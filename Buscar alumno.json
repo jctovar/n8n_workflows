@@ -1,0 +1,239 @@
+{
+  "active": true,
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Autentifica",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Autentifica": {
+      "main": [
+        [
+          {
+            "node": "Busca alumno",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Busca alumno": {
+      "main": [
+        [
+          {
+            "node": "Busca modulos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Busca modulos": {
+      "main": [
+        [
+          {
+            "node": "json to tabla html",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "json to tabla html": {
+      "main": [
+        [
+          {
+            "node": "Send Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2025-02-25T05:23:21.139Z",
+  "id": "QIL5vWANEDxoJ9kG",
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "name": "Buscar alumno",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Buscar alumno",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Número de cuenta",
+              "requiredField": true
+            }
+          ]
+        },
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        -60,
+        -100
+      ],
+      "id": "3dc5f788-cab7-4c17-8653-35f75ff9cc0a",
+      "name": "On form submission",
+      "webhookId": "a90769b0-029e-42f2-8a8b-ed4194c05e92"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://pocket.fanguye.com/api/collections/users/auth-with-password",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n\"identity\": \"hilda.bot@iztacala.unam.mx\",\n\"password\": \"L4vaca-lola*\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        140,
+        -100
+      ],
+      "id": "9a6af301-1915-48cd-b8a5-538e549de003",
+      "name": "Autentifica"
+    },
+    {
+      "parameters": {
+        "url": "=https://pocket.fanguye.com/api/collections/alumnos/records?filter=(username='{{ $('On form submission').item.json['Número de cuenta'] }}') ",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "={{ $json.token }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        300,
+        -100
+      ],
+      "id": "2656da8a-c849-4075-a072-4930a6b5a9c2",
+      "name": "Busca alumno"
+    },
+    {
+      "parameters": {
+        "url": "=https://pocket.fanguye.com/api/collections/inscripciones/records?filter=(username='{{ $('On form submission').item.json['Número de cuenta'] }}')&fields=modulo,grupo,periodo,tipo&sort=modulo,grupo ",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "={{ $('Autentifica').item.json.token }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        460,
+        -100
+      ],
+      "id": "44fcb030-94b4-4499-916d-e68ab643678b",
+      "name": "Busca modulos"
+    },
+    {
+      "parameters": {
+        "fromEmail": "HILDA BOT <hilda.bot@iztacala.unam.mx>",
+        "toEmail": "jctovar@iztacala.unam.mx",
+        "subject": "Resultado de la nusqueda",
+        "html": "=<h3>Datos del alumno:</h3>\n<ul>\n<li>Nombre: {{ $('Busca alumno').item.json.items[0].firstname }} {{ $('Busca alumno').item.json.items[0].lastname }}</li>\n<li>Número de cuenta: {{ $('Busca alumno').item.json.items[0].username }}</li>\n<li>Correo electronico: {{ $('Busca alumno').item.json.items[0].email }}</li>\n</ul>\n<h3>Modulos:</h3> \n<div>\n{{ $json.htmlTable }}\n</div>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        880,
+        -100
+      ],
+      "id": "83444a85-365c-4622-91aa-e5b9b9e0463d",
+      "name": "Send Email",
+      "webhookId": "03fbbe87-925f-4178-908d-feae1b42dfc8",
+      "credentials": {
+        "smtp": {
+          "id": "brtRMIbbmCJmObur",
+          "name": "SMTP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Pocketbase\n[Localización](https://pocket.fanguye.com/_/)",
+        "height": 260,
+        "width": 520
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        100,
+        -180
+      ],
+      "typeVersion": 1,
+      "id": "2f33d04b-7036-4f38-9aee-aec5162deeb3",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Obtener los items del JSON\nconst items = $input.all().map(item => item.json.items).flat();\n\n// Crear la tabla HTML\nlet htmlTable = '<table border=\"1\" style=\"border-collapse: collapse; width: 60%;\">';\nhtmlTable += '<thead><tr>';\nhtmlTable += '<th>Módulo</th><th>Grupo</th><th>Periodo</th><th>Tipo</th>';\nhtmlTable += '</tr></thead><tbody>';\n\n// Iterar sobre los items y agregar filas\nitems.forEach(item => {\n  htmlTable += '<tr>';\n  htmlTable += `<td>${item.modulo}</td>`;\n  htmlTable += `<td>${item.grupo}</td>`;\n  htmlTable += `<td>${item.periodo}</td>`;\n  htmlTable += `<td>${item.tipo}</td>`;\n  htmlTable += '</tr>';\n});\n\nhtmlTable += '</tbody></table>';\n\n// Devolver la tabla como un nuevo campo\nreturn [{ json: { htmlTable } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        700,
+        -100
+      ],
+      "id": "7a3d74b1-5f92-44c3-9d79-a6d85c7af507",
+      "name": "json to tabla html"
+    }
+  ],
+  "pinData": {},
+  "repo_name": "n8n_workflows",
+  "repo_owner": "jctovar",
+  "repo_path": "https://github.com/jctovar/n8n_workflows",
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 2,
+  "updatedAt": "2025-02-25T21:30:44.000Z",
+  "versionId": "8fc7561b-148f-4a69-894e-ebb1fcecf9d5"
+}
