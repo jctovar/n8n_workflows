@@ -1,0 +1,404 @@
+{
+  "active": true,
+  "connections": {
+    "MySQL 2025-2": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MySQL SUP": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "MySQL SUP updated",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "MySQL 2025-2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "MySQL SUP",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "MySQL SUP updated1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MySQL 2025-": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MySQL SUP1": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger1": {
+      "main": [
+        [
+          {
+            "node": "MySQL 2025-",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "MySQL SUP1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2025-02-26T09:03:42.326Z",
+  "id": "HgJc5zCVFKPD4vhM",
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "name": "Sync tables",
+  "nodes": [
+    {
+      "parameters": {
+        "mode": "combine",
+        "fieldsToMatchString": "id",
+        "joinMode": "keepNonMatches",
+        "outputDataFrom": "input1",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        220,
+        0
+      ],
+      "id": "6f51fd51-f2a1-4f05-9c16-45a018d2ce73",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "table": {
+          "__rl": true,
+          "value": "ired_course",
+          "mode": "list",
+          "cachedResultName": "ired_course"
+        },
+        "returnAll": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.4,
+      "position": [
+        -20,
+        -80
+      ],
+      "id": "a7ff975a-a590-48e0-a6d5-699ca1a4bf6f",
+      "name": "MySQL 2025-2",
+      "credentials": {
+        "mySql": {
+          "id": "uE6gbIvXBNFEpf3E",
+          "name": "MySQL account (enlinea 2025-2)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "table": {
+          "__rl": true,
+          "value": "ired_course",
+          "mode": "list",
+          "cachedResultName": "ired_course"
+        },
+        "returnAll": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.4,
+      "position": [
+        -20,
+        120
+      ],
+      "id": "7c8bd1b3-2ca9-4c86-8ccf-5858ce015db6",
+      "name": "MySQL SUP",
+      "credentials": {
+        "mySql": {
+          "id": "g3qBiiSpj2gfvzSz",
+          "name": "MySQL account (sup)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -300,
+        0
+      ],
+      "id": "92d0c82d-1309-4beb-9f0a-d30d355266ef",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "table": {
+          "__rl": true,
+          "value": "ired_course",
+          "mode": "list",
+          "cachedResultName": "ired_course"
+        },
+        "columnToMatchOn": "id",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.4,
+      "position": [
+        400,
+        0
+      ],
+      "id": "e35bdb87-d4f1-4bbc-b680-0af493661cdc",
+      "name": "MySQL SUP updated",
+      "credentials": {
+        "mySql": {
+          "id": "g3qBiiSpj2gfvzSz",
+          "name": "MySQL account (sup)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "fieldsToMatchString": "id",
+        "joinMode": "keepNonMatches",
+        "outputDataFrom": "input1",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        220,
+        -420
+      ],
+      "id": "031abc43-f339-4320-a5da-5af81733130f",
+      "name": "Merge1"
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "table": {
+          "__rl": true,
+          "value": "ired_user",
+          "mode": "list",
+          "cachedResultName": "ired_user"
+        },
+        "returnAll": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.4,
+      "position": [
+        -20,
+        -500
+      ],
+      "id": "c8dd47e0-aa05-4895-a7b6-16ecd0111e77",
+      "name": "MySQL 2025-",
+      "credentials": {
+        "mySql": {
+          "id": "uE6gbIvXBNFEpf3E",
+          "name": "MySQL account (enlinea 2025-2)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "table": {
+          "__rl": true,
+          "value": "ired_user",
+          "mode": "list",
+          "cachedResultName": "ired_user"
+        },
+        "returnAll": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.4,
+      "position": [
+        -20,
+        -300
+      ],
+      "id": "51de8b5f-ce01-4365-82cb-786b64cc7c63",
+      "name": "MySQL SUP1",
+      "credentials": {
+        "mySql": {
+          "id": "g3qBiiSpj2gfvzSz",
+          "name": "MySQL account (sup)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -300,
+        -420
+      ],
+      "id": "27b18b30-bfe0-4add-8f91-83a3337ef00e",
+      "name": "Schedule Trigger1"
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "table": {
+          "__rl": true,
+          "value": "ired_user",
+          "mode": "list",
+          "cachedResultName": "ired_user"
+        },
+        "columnToMatchOn": "id",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.4,
+      "position": [
+        400,
+        -420
+      ],
+      "id": "3ab531c4-b7ee-4adb-b3f2-f64085e61a34",
+      "name": "MySQL SUP updated1",
+      "credentials": {
+        "mySql": {
+          "id": "g3qBiiSpj2gfvzSz",
+          "name": "MySQL account (sup)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## ired_user\n**Double click** to edit me. [Guide](https://docs.n8n.io/workflows/sticky-notes/)",
+        "height": 400,
+        "width": 1020
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -400,
+        -540
+      ],
+      "typeVersion": 1,
+      "id": "90dfcaee-af08-4834-be71-6017d9d1ff46",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## ired_course\n**Double click** to edit me. [Guide](https://docs.n8n.io/workflows/sticky-notes/)",
+        "height": 400,
+        "width": 1020,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -400,
+        -120
+      ],
+      "typeVersion": 1,
+      "id": "da25a354-01b5-474e-86c5-456a4909082e",
+      "name": "Sticky Note1"
+    }
+  ],
+  "pinData": {},
+  "repo_name": "n8n_workflows",
+  "repo_owner": "jctovar",
+  "repo_path": "https://github.com/jctovar/n8n_workflows",
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": {
+    "node:Schedule Trigger": {
+      "recurrenceRules": []
+    },
+    "node:Schedule Trigger1": {
+      "recurrenceRules": []
+    }
+  },
+  "tags": [
+    {
+      "createdAt": "2025-02-25T18:19:38.687Z",
+      "updatedAt": "2025-02-25T18:19:38.687Z",
+      "id": "7w57ardTI4GKY7NO",
+      "name": "matriculación"
+    },
+    {
+      "createdAt": "2025-02-25T18:19:49.307Z",
+      "updatedAt": "2025-02-25T18:19:49.307Z",
+      "id": "ujQ2W6IxnvSdG5Re",
+      "name": "moodle"
+    }
+  ],
+  "triggerCount": 2,
+  "updatedAt": "2025-02-26T09:27:43.000Z",
+  "versionId": "83ae63c9-5b0d-4267-b128-e74d8097c945"
+}
