@@ -1,0 +1,271 @@
+{
+  "active": false,
+  "connections": {
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "MySQL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MySQL": {
+      "main": [
+        [
+          {
+            "node": "MySQL1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2025-02-26T05:45:02.053Z",
+  "id": "dKhB2rWs9DKRqehS",
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "name": "mysql",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -360,
+        -360
+      ],
+      "id": "6892fff5-67fc-45e8-88ba-4635645e3ec8",
+      "name": "When clicking ‘Test workflow’"
+    },
+    {
+      "parameters": {
+        "url": "=https://enlinea.iztacala.unam.mx/2025-2/webservice/rest/server.php?wstoken=731e5f1b5495303733d18287ebb68d67&wsfunction=core_enrol_get_users_courses&moodlewsrestformat=json&userid={{ $json.users[0].id }}",
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        220,
+        -380
+      ],
+      "id": "96f3361d-03d5-46d1-9733-16fde3e64f0d",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "select distinct\n\tt2.ch_alumno_num_cta AS username,\n\tUCASE(t2.ch_persona_nombre) AS firstname,\n\tUCASE(CONCAT(t2.ch_persona_appaterno, ' ', t2.ch_persona_apmaterno)) AS lastname,\n\tCONCAT(t2.ch_alumno_num_cta,'@iztacala.unam.mx') AS email,\n\tDATE_FORMAT(t2.dt_persona_nacimiento,'%d%m%Y') AS password,\n\t'PSICOLOGÍA' AS department,\n\t'SALA_ALUMNOS' AS course1,\n\tt2.nu_alumno_ingreso AS group1,\n\t'1' AS type1,\n\t'0' AS `enrolstatus1`\nfrom\n\tinscripcion_suayed t1\ninner join alumnos_suayed t2 on t1.ch_alumno_num_cta = t2.ch_alumno_num_cta\n  LIMIT 1\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.4,
+      "position": [
+        -200,
+        -360
+      ],
+      "id": "e111a98c-0a60-44de-8259-c60155849bec",
+      "name": "MySQL",
+      "credentials": {
+        "mySql": {
+          "id": "g3qBiiSpj2gfvzSz",
+          "name": "MySQL account (sup)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://enlinea.iztacala.unam.mx/2025-2/webservice/rest/server.php?wstoken=731e5f1b5495303733d18287ebb68d67&wsfunction=core_user_get_users&criteria[0][key]=username&moodlewsrestformat=json&criteria[0][value]={{ $json.username }}",
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        40,
+        -380
+      ],
+      "id": "9a7fd080-df2d-496b-9d9c-ca474068d967",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1AuCzhI95eW0z8IDcm5_MToRpxtvugrVpWqWaPWyQNY8/edit?gid=0#gid=0",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Hoja 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1AuCzhI95eW0z8IDcm5_MToRpxtvugrVpWqWaPWyQNY8/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "username": "={{ $('HTTP Request1').item.json.users[0].username }}",
+            "shortname": "={{ $json.shortname }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "username",
+              "displayName": "username",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "shortname",
+              "displayName": "shortname",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        560,
+        -380
+      ],
+      "id": "a28c122f-6639-48de-b375-68669a4fbb22",
+      "name": "Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "uEF8lwQmaDTQbbom",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "d4d0d66d-5e67-4d5f-8992-94c64f95d118",
+              "leftValue": "={{ $json.shortname }}",
+              "rightValue": "SALA_ALUMNOS",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        380,
+        -380
+      ],
+      "id": "288020b5-d9f1-4651-a857-e76b1e041369",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT\n\tt1.ch_alumno_num_cta AS username ,\n\tt2.ch_persona_nombre AS firstname ,\n\tCONCAT(t2.ch_persona_appaterno,' ',t2.ch_persona_apmaterno) AS lastname ,\n\tCONCAT(t2.ch_alumno_num_cta,'@iztacala.unam.mx') AS email,\n\tDATE_FORMAT(t2.dt_persona_nacimiento,'%d%m%Y') AS password,\n\t'Psicología' AS department ,\n\t'2025-01-26' AS enroltimestart1 ,\n\t(\n\t\tSELECT\n\t\t\tt3.shortname\n\t\tFROM\n\t\t\t`Aulas para Psicologia 2025-2 (sup)` t3\n\t\tWHERE\n\t\t\t(\n\t\t\t\t(\n\t\t\t\t\tt3.shortname LIKE CONCAT(t1.ch_asignatura_cve , '%')\n\t\t\t\t)\n\t\t\t\tand(\n\t\t\t\t\tt3.shortname LIKE CONCAT('%' , t1.ch_grupo_cve , '%')\n\t\t\t\t)\n\t\t\t)\n\t) AS course1 ,\n\t'1' as type1,\n\t'0' AS enrolstatus1\nFROM\n\t(\n\t\t`inscripcion_suayed` t1\n\t\tJOIN alumnos_suayed t2 ON(\n\t\t\t(\n\t\t\t\tt1.ch_alumno_num_cta = t2.ch_alumno_num_cta\n\t\t\t)\n\t\t)\n\t)\nWHERE\n\tt1.ch_grupo_cve not like 'E%' and t1.ch_alumno_num_cta = '{{ $json.username }}'",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.4,
+      "position": [
+        60,
+        -180
+      ],
+      "id": "fa72f217-cdac-4926-b83f-73b0f522d4be",
+      "name": "MySQL1",
+      "credentials": {
+        "mySql": {
+          "id": "g3qBiiSpj2gfvzSz",
+          "name": "MySQL account (sup)"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "repo_name": "n8n_workflows",
+  "repo_owner": "jctovar",
+  "repo_path": "https://github.com/jctovar/n8n_workflows",
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2025-02-27T20:31:32.000Z",
+  "versionId": "0ff10a85-910c-4cd0-acc6-56fb75bf720b"
+}
