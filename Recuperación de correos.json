@@ -1,0 +1,806 @@
+{
+  "active": true,
+  "connections": {
+    "Verificar usuario": {
+      "main": [
+        [
+          {
+            "node": "Cambiar contraseña",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Autentifica",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generar contraseña": {
+      "main": [
+        [
+          {
+            "node": "Verificar usuario",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cambiar contraseña": {
+      "main": [
+        [
+          {
+            "node": "Solicitar codigos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Solicitar codigos": {
+      "main": [
+        [
+          {
+            "node": "Recuperar codigos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recuperar codigos": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redactar correo": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Redactar correo",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Solicitar codigos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Autentifica": {
+      "main": [
+        [
+          {
+            "node": "Busca alumno",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Busca alumno": {
+      "main": [
+        [
+          {
+            "node": "Crea cuenta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Crea cuenta": {
+      "main": [
+        [
+          {
+            "node": "Send Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets Trigger": {
+      "main": [
+        [
+          {
+            "node": "Generar contraseña",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Email": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2025-02-25T05:25:39.916Z",
+  "id": "dixFvtK00iosb0VB",
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "name": "Recuperación de correos",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "get",
+        "userId": "={{ $('Google Sheets Trigger').item.json['Número de cuenta (9 dígitos)'] }}@iztacala.unam.mx",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gSuiteAdmin",
+      "typeVersion": 1,
+      "position": [
+        -200,
+        -360
+      ],
+      "id": "7579762c-cc07-4e2b-9d72-a8887ebe39c2",
+      "name": "Verificar usuario",
+      "alwaysOutputData": false,
+      "credentials": {
+        "gSuiteAdminOAuth2Api": {
+          "id": "GLNioPJiC2prVKtW",
+          "name": "Google Workspace Admin account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "function generarContrasena() {\n    const caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';\n    let contrasena = '';\n    for (let i = 0; i < 10; i++) {\n        const indice = Math.floor(Math.random() * caracteres.length);\n        contrasena += caracteres.charAt(indice);\n    }\n    return contrasena;\n}\n\n// Ejemplo de uso:\nconsole.log(generarContrasena());\n\n// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nfor (const item of $input.all()) {\n  item.json.newPassword = generarContrasena();\n}\n\nreturn $input.all();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -380,
+        -360
+      ],
+      "id": "9bcc275f-98cf-43bb-bca4-0bca13d08c92",
+      "name": "Generar contraseña"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "userId": "={{ $json.primaryEmail }}",
+        "updateFields": {
+          "changePasswordAtNextLogin": true,
+          "password": "={{ $('Generar contraseña').item.json.newPassword }}",
+          "phoneUi": {
+            "phoneValues": [
+              {
+                "type": "mobile",
+                "value": "={{ $('Google Sheets Trigger').item.json['Número telefónico de celular (10 dígitos) que se utilizará únicamente para la verificación de dos pasos, una vez realizado el proceso de verificación este dato se borrará de la base de datos.'] }}"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.gSuiteAdmin",
+      "typeVersion": 1,
+      "position": [
+        60,
+        -380
+      ],
+      "id": "a8f22163-a2c3-432b-b5c7-a6e94e7157f1",
+      "name": "Cambiar contraseña",
+      "credentials": {
+        "gSuiteAdminOAuth2Api": {
+          "id": "GLNioPJiC2prVKtW",
+          "name": "Google Workspace Admin account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://admin.googleapis.com/admin/directory/v1/users/{{ $json.emails[1].address }}/verificationCodes/generate ",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleOAuth2Api",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        360,
+        -380
+      ],
+      "id": "0799953d-b70a-401c-b775-5b522265b483",
+      "name": "Solicitar codigos",
+      "retryOnFail": true,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "googleOAuth2Api": {
+          "id": "jAdCikkKebEfb8M1",
+          "name": "Google account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://admin.googleapis.com/admin/directory/v1/users/{{ $('Verificar usuario').item.json.primaryEmail }}/verificationCodes",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleOAuth2Api",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        600,
+        -380
+      ],
+      "id": "21363a17-fef7-4638-8c65-ce61e25105ee",
+      "name": "Recuperar codigos",
+      "credentials": {
+        "googleOAuth2Api": {
+          "id": "jAdCikkKebEfb8M1",
+          "name": "Google account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Google Sheets Trigger').item.json['Dirección de correo electrónico'] }}",
+        "subject": "Recuperación de contraseña de correo iztacala",
+        "message": "=<p>Estimado/a: {{ $('Verificar usuario').item.json.name.fullName }} ({{ $('Google Sheets Trigger').item.json['Número de cuenta (9 dígitos)'] }})</p>\n\n<p>Se le ha dado mantenimiento a tu cuenta de correo electrónico (<b>{{ $('Verificar usuario').item.json.emails[1].address }}</b>), se ha cambiado la contraseña y se te proporcionan los códigos de verificación de dos pasos. Te recomendamos guardar estos en un lugar seguro.</p>\n\n<p>La nueva contraseña es: <b>{{ $('Generar contraseña').item.json.newPassword }}</b></p>\n\n<p>Códigos de seguridad de 8 dígitos:</p>\n<p><b>\n{{ $json.items[0].verificationCode }} {{ $json.items[1].verificationCode }} {{ $json.items[2].verificationCode }} {{ $json.items[3].verificationCode }} {{ $json.items[4].verificationCode }} {{ $json.items[5].verificationCode }} {{$json.items[6].verificationCode }} {{ $json.items[7].verificationCode }} {{ $json.items[8].verificationCode }} {{$json.items[9].verificationCode }}</b></p>\n\n<p>Te recomendamos a la brevedad activar la verificación de dos pasos, revisando el apartado de seguridad de tu cuenta de correo iztacala.</p>\n\n<p>Puedes usar este tutorial para apoyarte con la verificación de dos pasos. Si no se realiza a la brevedad Google bloqueará la cuenta de nuevo</p>\n\n<p>https://youtu.be/0tpin55ra88?si=igLqBkdxpOittRie</p>\n\n<p><b>Atentamente la Coordinación de Educación a Distancia de la FES Iztacala</b></p>\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1120,
+        -400
+      ],
+      "id": "36372ec5-9869-4e2a-848d-a9fc7e18bb2d",
+      "name": "Redactar correo",
+      "webhookId": "c5686d71-237b-4182-94d8-145fce39698b",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "7YCO28bg09F6eZJ7",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "1e6bc043-592b-4f11-a575-ef3aed3f59e5",
+              "leftValue": "={{ $json.items[0] }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        840,
+        -380
+      ],
+      "id": "4f1405d2-2d06-4ab2-980a-66155de1c37e",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://pocket.fanguye.com/api/collections/users/auth-with-password",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n\"identity\": \"hilda.bot@iztacala.unam.mx\",\n\"password\": \"L4vaca-lola*\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        120,
+        -40
+      ],
+      "id": "77660f23-0ed2-4356-8a92-e26f2e103e52",
+      "name": "Autentifica"
+    },
+    {
+      "parameters": {
+        "url": "=https://pocket.fanguye.com/api/collections/alumnos/records?filter=(username='{{ $('Google Sheets Trigger').item.json['Número de cuenta (9 dígitos)'] }}') ",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "={{ $json.token }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        340,
+        -40
+      ],
+      "id": "f5355523-6aff-450e-9638-69f9a6973850",
+      "name": "Busca alumno"
+    },
+    {
+      "parameters": {
+        "content": "## Creación de cuenta de correo\n",
+        "height": 320,
+        "width": 1020
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        40,
+        -140
+      ],
+      "typeVersion": 1,
+      "id": "2fe15b0a-fa2d-4620-92be-5fdd986cf316",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "firstName": "={{ $json.items[0].firstname }}",
+        "lastName": "={{ $json.items[0].lastname }}",
+        "password": "={{ $('Generar contraseña').item.json.newPassword }}",
+        "domain": "iztacala.unam.mx",
+        "username": "={{ $json.items[0].username }}",
+        "additionalFields": {
+          "changePasswordAtNextLogin": true,
+          "phoneUi": {
+            "phoneValues": [
+              {
+                "type": "mobile",
+                "value": "={{ $('Google Sheets Trigger').item.json['Número telefónico de celular (10 dígitos) que se utilizará únicamente para la verificación de dos pasos, una vez realizado el proceso de verificación este dato se borrará de la base de datos.'] }}",
+                "primary": true
+              }
+            ]
+          },
+          "emailUi": {
+            "emailValues": [
+              {
+                "type": "home",
+                "address": "={{ $('Google Sheets Trigger').item.json['Dirección de correo electrónico'] }}"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.gSuiteAdmin",
+      "typeVersion": 1,
+      "position": [
+        580,
+        -40
+      ],
+      "id": "8c170b98-be43-4d48-9c56-59cbb087227d",
+      "name": "Crea cuenta",
+      "credentials": {
+        "gSuiteAdminOAuth2Api": {
+          "id": "GLNioPJiC2prVKtW",
+          "name": "Google Workspace Admin account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "14PqJ5fdkruP5awbWw0BTT8Mid7itMexVNOEa7-iFwuA",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 262114308,
+          "mode": "list",
+          "cachedResultName": "Respuestas de formulario 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14PqJ5fdkruP5awbWw0BTT8Mid7itMexVNOEa7-iFwuA/edit#gid=262114308"
+        },
+        "event": "rowAdded",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        -620,
+        -360
+      ],
+      "id": "39f0a307-df95-4012-88f9-8fc1843e5901",
+      "name": "Google Sheets Trigger",
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "0HUMFx7ETrdExvle",
+          "name": "Google Sheets Trigger account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "14PqJ5fdkruP5awbWw0BTT8Mid7itMexVNOEa7-iFwuA",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 262114308,
+          "mode": "list",
+          "cachedResultName": "Respuestas de formulario 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14PqJ5fdkruP5awbWw0BTT8Mid7itMexVNOEa7-iFwuA/edit#gid=262114308"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Status": "Listones",
+            "Marca temporal": "={{ $('Google Sheets Trigger').item.json['Marca temporal'] }}"
+          },
+          "matchingColumns": [
+            "Marca temporal"
+          ],
+          "schema": [
+            {
+              "id": "Marca temporal",
+              "displayName": "Marca temporal",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Dirección de correo electrónico",
+              "displayName": "Dirección de correo electrónico",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Nombre",
+              "displayName": "Nombre",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Apellidos",
+              "displayName": "Apellidos",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Número de cuenta (9 dígitos)",
+              "displayName": "Número de cuenta (9 dígitos)",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Número telefónico de celular (10 dígitos) que se utilizará únicamente para la verificación de dos pasos, una vez realizado el proceso de verificación este dato se borrará de la base de datos.",
+              "displayName": "Número telefónico de celular (10 dígitos) que se utilizará únicamente para la verificación de dos pasos, una vez realizado el proceso de verificación este dato se borrará de la base de datos.",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1120,
+        -40
+      ],
+      "id": "b3365c8a-3167-4154-84c5-2e6a8c6f836f",
+      "name": "Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "uEF8lwQmaDTQbbom",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "14PqJ5fdkruP5awbWw0BTT8Mid7itMexVNOEa7-iFwuA",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 262114308,
+          "mode": "list",
+          "cachedResultName": "Respuestas de formulario 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14PqJ5fdkruP5awbWw0BTT8Mid7itMexVNOEa7-iFwuA/edit#gid=262114308"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Status": "Listones",
+            "Marca temporal": "={{ $('Google Sheets Trigger').item.json['Marca temporal'] }}"
+          },
+          "matchingColumns": [
+            "Marca temporal"
+          ],
+          "schema": [
+            {
+              "id": "Marca temporal",
+              "displayName": "Marca temporal",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Dirección de correo electrónico",
+              "displayName": "Dirección de correo electrónico",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Nombre",
+              "displayName": "Nombre",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Apellidos",
+              "displayName": "Apellidos",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Número de cuenta (9 dígitos)",
+              "displayName": "Número de cuenta (9 dígitos)",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Número telefónico de celular (10 dígitos) que se utilizará únicamente para la verificación de dos pasos, una vez realizado el proceso de verificación este dato se borrará de la base de datos.",
+              "displayName": "Número telefónico de celular (10 dígitos) que se utilizará únicamente para la verificación de dos pasos, una vez realizado el proceso de verificación este dato se borrará de la base de datos.",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1340,
+        -400
+      ],
+      "id": "f61f6fac-01a4-435f-afe7-83c6ad31d48c",
+      "name": "Google Sheets1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "uEF8lwQmaDTQbbom",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Etapa critica \nhttps://www.googleapis.com/auth/admin.directory.user.security",
+        "height": 260,
+        "width": 500
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        280,
+        -480
+      ],
+      "typeVersion": 1,
+      "id": "c6dfa010-6f92-4543-9c15-8c33c93cbc09",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "fromEmail": "APOYO PLATAFORMAS. <hidla.bot@iztacala.unam.mx>",
+        "toEmail": "{{ $('Google Sheets Trigger').item.json['Dirección de correo electrónico'] }}",
+        "subject": "Creación de cuenta de correo iztacala",
+        "html": "<p>Estimado/a: {{ $json.name.givenName }} {{ $json.name.familyName }} ({{ $('Google Sheets Trigger').item.json['Número de cuenta (9 dígitos)'] }})</p>\n\n<p>Se le ha creado una cuenta de correo electrónico institucional para el uso académico de sus estudios (<b>{{ $json.primaryEmail }}</b>).</p>\n\n<p>La contraseña inicial es: <b>{{ $('Generar contraseña').item.json.newPassword }}</b></p>\n\nPara ingresar, le recordamos que su usuario es el correo electrónico: {{ $json.primaryEmail }}\n\n<a href=\"https://accounts.google.com/AccountChooser/signinchooser?service=mail&continue=https://mail.google.com/mail/&flowName=GlifWebSignIn&flowEntry=AccountChooser&ec=asw-gmail-globalnav-signin\">Ingresar a Gmail</a>\n\n<p>Te recomendamos a la brevedad activar la verificación de dos pasos, revisando el apartado de seguridad de tu cuenta de correo iztacala.</p>\n\n<p>Puedes usar este tutorial para apoyarte con la verificación de dos pasos. Si no se realiza a la brevedad Google bloqueará la cuenta de nuevo</p>\n\n<p>https://youtu.be/0tpin55ra88?si=igLqBkdxpOittRie</p>\n\n<p><b>Atentamente la Coordinación de Educación a Distancia de la FES Iztacala</b></p>\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        800,
+        -40
+      ],
+      "id": "e4e025fe-327a-4b37-8698-6e55dcf45b8f",
+      "name": "Send Email",
+      "webhookId": "f8daf144-7be5-4496-a254-11f09bf7b757",
+      "retryOnFail": true,
+      "maxTries": 2,
+      "credentials": {
+        "smtp": {
+          "id": "brtRMIbbmCJmObur",
+          "name": "SMTP account (hilda.bot@iztacala.unam.mx)"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "repo_name": "n8n_workflows",
+  "repo_owner": "jctovar",
+  "repo_path": "https://github.com/jctovar/n8n_workflows",
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "America/Mexico_City",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "staticData": {
+    "node:Google Sheets Trigger": {
+      "documentId": "14PqJ5fdkruP5awbWw0BTT8Mid7itMexVNOEa7-iFwuA",
+      "sheetId": 262114308,
+      "lastIndexChecked": 3
+    }
+  },
+  "tags": [
+    {
+      "createdAt": "2025-02-25T18:19:52.379Z",
+      "updatedAt": "2025-02-25T18:19:52.379Z",
+      "id": "ANk3Y6xzujG4SO2H",
+      "name": "suayed"
+    },
+    {
+      "createdAt": "2025-02-26T02:34:29.948Z",
+      "updatedAt": "2025-02-26T02:34:29.948Z",
+      "id": "TG8IRlkF2db7SJ7J",
+      "name": "iztacala"
+    },
+    {
+      "createdAt": "2025-02-26T02:34:22.133Z",
+      "updatedAt": "2025-02-26T02:34:22.133Z",
+      "id": "slQeEpwbat1QTg70",
+      "name": "correo"
+    }
+  ],
+  "triggerCount": 1,
+  "updatedAt": "2025-02-27T18:40:43.000Z",
+  "versionId": "fcefd697-a5e5-4589-8171-744412051236"
+}
