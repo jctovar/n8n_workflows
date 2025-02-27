@@ -1,0 +1,305 @@
+{
+  "active": false,
+  "connections": {
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "Inscripciones ordinarios",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Inscripciones extraordinarios largos",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Total matriculado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Convert to bajas": {
+      "main": [
+        [
+          {
+            "node": "SFTP to enlinea.iztcala.unam.mx1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Total matriculado": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "Convert to bajas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Inscripciones extraordinarios largos": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Inscripciones ordinarios": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2025-02-25T05:51:29.834Z",
+  "id": "DvUlqbdUXK8O5DvV",
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "name": "Bajas del SUAyED",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "74bb64e1-af15-4bf4-8656-5ceaa6db2430",
+      "name": "When clicking ‘Test workflow’"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        480,
+        -160
+      ],
+      "id": "50b8afa3-f17a-4401-b143-63f10d8b729e",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "protocol": "sftp",
+        "operation": "upload",
+        "path": "/home/n8n/bajas.csv"
+      },
+      "type": "n8n-nodes-base.ftp",
+      "typeVersion": 1,
+      "position": [
+        1080,
+        -180
+      ],
+      "id": "18be0ca8-1840-4e3e-b431-cf3d57a96f18",
+      "name": "SFTP to enlinea.iztcala.unam.mx1",
+      "credentials": {
+        "sftp": {
+          "id": "Sq6rKhlhRHwDQc5t",
+          "name": "FTP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        860,
+        -180
+      ],
+      "id": "41fa031b-4c00-4862-a5a6-b74f9ec7ce1f",
+      "name": "Convert to bajas"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT\n\t`t2`.`username` AS `username`,\n\t`t2`.`firstname` AS `firstname`,\n\t`t2`.`lastname` AS `lastname`,\n\t`t2`.`email` AS `email`,\n\t`t4`.`shortname` AS `course1`,\n\t`t2`.`department` AS `department`,\n\t'1' AS `enrolstatus1` \nFROM\n\t(((\n\t\t\t\t`ired_user_enrolments` `t1`\n\t\t\t\tJOIN `ired_user` `t2` ON ((\n\t\t\t\t\t\t`t1`.`userid` = `t2`.`id` \n\t\t\t\t\t)))\n\t\t\tJOIN `ired_enrol` `t3` ON ((\n\t\t\t\t\t`t1`.`enrolid` = `t3`.`id` \n\t\t\t\t)))\n\t\tJOIN `ired_course` `t4` ON ((\n\t\t\t\t`t3`.`courseid` = `t4`.`id` \n\t\t\t))) \nWHERE\n\t(\n\t\tregexp_like ( `t2`.`username`, '^[0-9]{9}$' ) \n\t\tAND ( `t2`.`department` = 'Psicología' ) \n\tAND ( `t4`.`category` = 2 )) \nORDER BY\n\t`t4`.`shortname`",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.4,
+      "position": [
+        220,
+        -400
+      ],
+      "id": "4a82ca7a-1040-4ebc-afdf-187f3f418c44",
+      "name": "Total matriculado",
+      "credentials": {
+        "mySql": {
+          "id": "uE6gbIvXBNFEpf3E",
+          "name": "MySQL account (enlinea 2025-2)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "fieldsToMatchString": "username, course1",
+        "joinMode": "keepNonMatches",
+        "outputDataFrom": "input1",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        680,
+        -180
+      ],
+      "id": "c0ff5806-224a-405f-b1bc-8376128da817",
+      "name": "Merge1"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT\n\tt1.ch_alumno_num_cta AS username,\n\tt4.ch_persona_nombre AS firstname,\n\tCONCAT( t4.ch_persona_appaterno, ' ', t4.ch_persona_apmaterno ) AS lastname,\n\tLOWER( CONCAT( t1.ch_alumno_num_cta, '@iztacala.unam.mx' ) ) AS email,\n\tDATE_FORMAT( t4.dt_persona_nacimiento, '%d%m%Y' ) AS 'password',\n\t'Psicología' AS department,\n\t'2025-01-31' AS enroltimestart1,\n\t(\n\tSELECT\n\t\tt3.shortname \n\tFROM\n\t\t`Aulas para Psicologia 2025-2 (sup)` t3 \n\tWHERE\n\t\t(\n\t\t\t( t3.shortname LIKE CONCAT( t1.ch_asignatura_cve, '%' ) ) \n\t\t\tAND ( t3.shortname LIKE CONCAT( '%', t2.`group`, '%' ) ) \n\t\t) # LIMIT 1\n\t\t\n\t) AS course1,\n\t'1' AS type1,\n\t'0' AS enrolstatus1 \nFROM\n\tinscripcion_suayed t1\n\tINNER JOIN extraordinarie_long t2 ON t1.ch_grupo_cve = t2.translation\n\tINNER JOIN alumnos_suayed t4 ON t1.ch_alumno_num_cta = t4.ch_alumno_num_cta \n\tAND t1.ch_asignatura_cve = t2.module \n\tAND t2.period = '2025-2' \nORDER BY\n\tt1.ch_alumno_num_cta",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.4,
+      "position": [
+        220,
+        -180
+      ],
+      "id": "69c5e43d-866c-43e1-a41d-4adb60f10075",
+      "name": "Inscripciones extraordinarios largos",
+      "credentials": {
+        "mySql": {
+          "id": "g3qBiiSpj2gfvzSz",
+          "name": "MySQL account (sup)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT\n\tt1.ch_alumno_num_cta AS username ,\n\tt2.ch_persona_nombre AS firstname ,\n\tCONCAT(t2.ch_persona_appaterno,' ',t2.ch_persona_apmaterno) AS lastname ,\n\tCONCAT(t2.ch_alumno_num_cta,'@iztacala.unam.mx') AS email,\n\tDATE_FORMAT(t2.dt_persona_nacimiento,'%d%m%Y') AS password,\n\t'Psicología' AS department ,\n\t'2025-01-26' AS enroltimestart1 ,\n\t(\n\t\tSELECT\n\t\t\tt3.shortname\n\t\tFROM\n\t\t\t`Aulas para Psicologia 2025-2 (sup)` t3\n\t\tWHERE\n\t\t\t(\n\t\t\t\t(\n\t\t\t\t\tt3.shortname LIKE CONCAT(t1.ch_asignatura_cve , '%')\n\t\t\t\t)\n\t\t\t\tand(\n\t\t\t\t\tt3.shortname LIKE CONCAT('%' , t1.ch_grupo_cve , '%')\n\t\t\t\t)\n\t\t\t)\n\t) AS course1 ,\n\t'1' as type1,\n\t'0' AS enrolstatus1\nFROM\n\t(\n\t\t`inscripcion_suayed` t1\n\t\tJOIN alumnos_suayed t2 ON(\n\t\t\t(\n\t\t\t\tt1.ch_alumno_num_cta = t2.ch_alumno_num_cta\n\t\t\t)\n\t\t)\n\t)\nWHERE\n\tt1.ch_grupo_cve not like 'E%'",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.4,
+      "position": [
+        220,
+        0
+      ],
+      "id": "9040f288-8c3a-4d77-a89e-da7d74d732db",
+      "name": "Inscripciones ordinarios",
+      "credentials": {
+        "mySql": {
+          "id": "g3qBiiSpj2gfvzSz",
+          "name": "MySQL account (sup)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## 2025-2\nenlinea [link](https://enlinea.iztacala.unam.mx/2025-2/)",
+        "height": 260,
+        "width": 260,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        140,
+        -480
+      ],
+      "typeVersion": 1,
+      "id": "8ef32caa-f2c4-4c6e-8768-ac53d4d719d0",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## 2025-2\nenlinea [link](https://enlinea.iztacala.unam.mx/2025-2/)",
+        "height": 260,
+        "width": 260,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1000,
+        -260
+      ],
+      "typeVersion": 1,
+      "id": "f877bf58-9afc-4b3b-a865-6bb40d8f1612",
+      "name": "Sticky Note1"
+    }
+  ],
+  "pinData": {},
+  "repo_name": "n8n_workflows",
+  "repo_owner": "jctovar",
+  "repo_path": "https://github.com/jctovar/n8n_workflows",
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "createdAt": "2025-02-25T18:18:50.574Z",
+      "updatedAt": "2025-02-25T18:19:29.398Z",
+      "id": "7AUk1DSLHZoJ6oXF",
+      "name": "bajas"
+    },
+    {
+      "createdAt": "2025-02-25T18:19:38.687Z",
+      "updatedAt": "2025-02-25T18:19:38.687Z",
+      "id": "7w57ardTI4GKY7NO",
+      "name": "matriculación"
+    },
+    {
+      "createdAt": "2025-02-25T18:19:52.379Z",
+      "updatedAt": "2025-02-25T18:19:52.379Z",
+      "id": "ANk3Y6xzujG4SO2H",
+      "name": "suayed"
+    },
+    {
+      "createdAt": "2025-02-25T18:19:49.307Z",
+      "updatedAt": "2025-02-25T18:19:49.307Z",
+      "id": "ujQ2W6IxnvSdG5Re",
+      "name": "moodle"
+    }
+  ],
+  "triggerCount": 0,
+  "updatedAt": "2025-02-27T16:53:17.000Z",
+  "versionId": "bbb57f2d-6745-43cc-9331-c3554c1e73fd"
+}
