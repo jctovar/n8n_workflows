@@ -121,7 +121,7 @@
     },
     {
       "parameters": {
-        "url": "=https://enlinea.iztacala.unam.mx/2025-2/webservice/rest/server.php?wstoken=731e5f1b5495303733d18287ebb68d67&wsfunction=core_user_get_users&criteria[0][key]=username&moodlewsrestformat=json&criteria[0][value]={{ $json.username }}",
+        "url": "=https://enlinea.iztacala.unam.mx/2025-2/webservice/rest/server.php?wstoken=731e5f1b5495303733d18287ebb68d67&wsfunction=core_user_get_users&criteria[0][key]=username&moodlewsrestformat=json&criteria[0][value]={{ $json.username }};",
         "options": {
           "redirect": {
             "redirect": {}
